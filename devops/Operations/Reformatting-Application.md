@@ -20,11 +20,11 @@
 3. Drop and re-create the database.
 
     ```sql
-    drop database mikaponics_db;
-    create database mikaponics_db;
-    \c mikaponics_db;
+    drop database nwapp_db;
+    create database nwapp_db;
+    \c nwapp_db;
     CREATE USER django WITH PASSWORD '123password';
-    GRANT ALL PRIVILEGES ON DATABASE mikaponics_db to django;
+    GRANT ALL PRIVILEGES ON DATABASE nwapp_db to django;
     ALTER USER django CREATEDB;
     ALTER ROLE django SUPERUSER;
     CREATE EXTENSION postgis;
@@ -46,7 +46,7 @@
 6. Go to the project.
 
     ```bash
-    cd /opt/django/mikaponics-back
+    cd /opt/django/nwapp-back
     ```
 
 7. Activate our virtual environment.
@@ -64,11 +64,10 @@
 9. Start up the project again. **Please change the password to your own.**
 
     ```bash
-    cd mikaponics;
+    cd nwapp;
     python manage.py migrate;
-    python manage.py init_mikaponics;
-    python manage.py init_crop_data_sheets
-    python manage.py create_admin_user "bart@mikasoftware.com" "123password" "Bart" "Mika";
+    python manage.py init_app;
+    python manage.py create_admin_user "bart@mikasoftware.com" "123password" "Bart" "Mika" 1;
     python manage.py setup_resource_server_authorization;
     ```
 
@@ -105,7 +104,7 @@
 Run the following code.
 
 ```
-cd /var/www/app.mikaponics.com; \
+cd /var/www/nwapp.ca; \
 git pull origin master; \
 npm install; \
 sudo npm run build; \

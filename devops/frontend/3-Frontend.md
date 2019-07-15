@@ -64,6 +64,7 @@ Special thanks to the following article:
         server_name *.nwapp.ca;
 
         location / {
+            add_header 'Access-Control-Allow-Origin' '*'; # Read: https://www.scalescale.com/tips/nginx/allow-cross-domain-ajax-requests-nginx/#
             root  /var/www/nwapp.ca/build;
             index  index.html index.htm;
             try_files $uri /index.html =404;
