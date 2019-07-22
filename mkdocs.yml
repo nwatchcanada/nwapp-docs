@@ -3,17 +3,10 @@ nav:
     - Home: index.md
     # - Architecture: architecture.md
     # - Hardware: parts.md
-    # - Installation:
-    #     - Device: installation/device.md
-    #     - Serial Communication: installation/serial_communication.md
-    #     - Services: installation/services.md
-    # - Usage:
-    #     - Nameserver: usage/nameserver.md
-    #     - Storage: usage/storage.md
-    #     - Instruments: usage/instruments.md
-    #     - Logging: usage/logging.md
-    #     - Remote: usage/remote.md
-    #     - Serial: usage/serial.md
-    # - Reference:
-    #     - Environment Variables: reference/environment_variables.md
+    - Installation:
+        - Backend: installation/backend.md
+        - Frontend: installation/frontend.md
+    - Reference:
+        - Environment Variables: reference/environment-variables.md
+        - API: reference/api.md
 theme: readthedocs

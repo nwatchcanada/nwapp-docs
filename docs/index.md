@@ -1,17 +1,6 @@
-# Welcome to MkDocs
+# Welcome to NWApp
 
-For full documentation visit [mkdocs.org](https://mkdocs.org).
+This is documentation provided by [Neighbourhood Watch Canada](https://nwlondon.ca/) organization for installation, usage and development of the **NWApp** open-source project. The documentation will provide details on how to setup the following components:
 
-## Commands
-
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs help` - Print this help message.
-
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+* [Frontend](https://github.com/nwatchcanada/nwapp-front)
+* [Backend](https://github.com/nwatchcanada/nwapp-back)
