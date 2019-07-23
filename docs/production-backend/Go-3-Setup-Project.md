@@ -12,10 +12,10 @@
     drop database nwapp_golang_db;
     create database nwapp_golang_db;
     \c nwapp_golang_db;
-    CREATE USER golang WITH PASSWORD '123password';
-    GRANT ALL PRIVILEGES ON DATABASE nwapp_golang_db to golang;
-    ALTER USER golang CREATEDB;
-    ALTER ROLE golang SUPERUSER;
+    CREATE USER nwatchcanada WITH PASSWORD '123password';
+    GRANT ALL PRIVILEGES ON DATABASE nwapp_golang_db to nwatchcanada;
+    ALTER USER nwatchcanada CREATEDB;
+    ALTER ROLE nwatchcanada SUPERUSER;
     CREATE EXTENSION postgis;
     ```
 
@@ -26,10 +26,10 @@
     drop database nwapp_golang_test_db;
     create database nwapp_golang_test_db;
     \c nwapp_golang_test_db;
-    CREATE USER golang WITH PASSWORD '123password';
-    GRANT ALL PRIVILEGES ON DATABASE nwapp_golang_test_db to golang;
-    ALTER USER golang CREATEDB;
-    ALTER ROLE golang SUPERUSER;
+    CREATE USER nwatchcanada WITH PASSWORD '123password';
+    GRANT ALL PRIVILEGES ON DATABASE nwapp_golang_test_db to nwatchcanada;
+    ALTER USER nwatchcanada CREATEDB;
+    ALTER ROLE nwatchcanada SUPERUSER;
     CREATE EXTENSION postgis;
     ```
 
@@ -70,7 +70,7 @@
     #!/bin/bash
     export NWAPP_DB_HOST="localhost"
     export NWAPP_DB_PORT="5432"
-    export NWAPP_DB_USER="django"
+    export NWAPP_DB_USER="nwatchcanada"
     export NWAPP_DB_PASSWORD="123password"
     export NWAPP_DB_NAME="nwapp_golang_db"
     export NWAPP_APP_ADDRESS="127.0.0.1:8000"
@@ -89,7 +89,7 @@
     $ sudo setcap 'cap_net_bind_service=+ep' /opt/nwatchcanada/go/bin/nwapp-back
     $ sudo setsebool -P httpd_can_network_connect 1
     $ sudo semanage permissive -a httpd_t
-    $ sudo chcon -Rt httpd_sys_content_t /opt/golang/workery-golang/workery/static
+    //$ sudo chcon -Rt httpd_sys_content_t /opt/golang/workery-golang/workery/static    (DEPRECATED)
     ```
 
 
@@ -108,7 +108,7 @@ Please run the following commands as the ``techops`` user account.
     ```
     server {
         listen       80;
-        server_name  SERVER_DOMAIN_NAME_OR_IP;
+        server_name  nwapp.ws;
 
         charset utf-8;
 
@@ -117,7 +117,7 @@ Please run the following commands as the ``techops`` user account.
             proxy_set_header X-Real-IP       $remote_addr;
             proxy_set_header Host            $http_host;
 
-            proxy_pass http://127.0.0.1:8080;
+            proxy_pass http://127.0.0.1:8000;
         }
     }
     ```
@@ -133,12 +133,12 @@ Please run the following commands as the ``techops`` user account.
 4. Run your go app manually.
 
     ```
-    # su - nwatchcanada
-    # go run github.com/nwatchcanada/nwapp-back
+    # sudo su - nwatchcanada
+    # $GOBIN/nwapp-back
     ```
 
 
-5. Now in your browser go to ``http://SERVER_DOMAIN_NAME_OR_IP`` and you should see the app!
+5. Now in your browser go to ``http://nwapp.ws`` and you should see the app!
 
 
 6. Special thanks to:
@@ -170,19 +170,19 @@ This section explains how to integrate our project with ``systemd`` so our opera
     [Service]
     Environment=NWAPP_DB_HOST=localhost
     Environment=NWAPP_DB_PORT=5432
-    Environment=NWAPP_DB_USER=golang
+    Environment=NWAPP_DB_USER=nwatchcanada
     Environment=NWAPP_DB_PASSWORD=123password
     Environment=NWAPP_DB_NAME=nwapp_golang_db
     Environment=NWAPP_APP_ADDRESS=127.0.0.1:8000
     Type=simple
     DynamicUser=yes
     WorkingDirectory=/opt/nwatchcanada/go/bin
-    ExecStartPre=$NWAPP_DB_HOST
-    ExecStartPre=$NWAPP_DB_PORT
-    ExecStartPre=$NWAPP_DB_USER
-    ExecStartPre=$NWAPP_DB_PASSWORD
-    ExecStartPre=$NWAPP_DB_NAME
-    ExecStartPre=$NWAPP_APP_ADDRESS
+    ExecStartPre=NWAPP_DB_HOST
+    ExecStartPre=NWAPP_DB_PORT
+    ExecStartPre=NWAPP_DB_USER
+    ExecStartPre=NWAPP_DB_PASSWORD
+    ExecStartPre=NWAPP_DB_NAME
+    ExecStartPre=NWAPP_APP_ADDRESS
     ExecStart=/opt/nwatchcanada/go/bin/nwapp-back
     Restart=always
     RestartSec=3
@@ -226,5 +226,31 @@ This section explains how to integrate our project with ``systemd`` so our opera
 8. And verify the URL works in the browser.
 
     ```text
-    http://SERVER_DOMAIN_NAME_OR_IP/en/
+    http://nwapp.ws/version
+    ```
+
+### Finalize Project Setup
+
+1. Make sure you login as the ``nwatchcanada`` user:
+
+```
+$ sudo su - nwatchcanada
+```
+
+2. Add our tenant.
+
+```
+$ $GOBIN/nwapp-back add_tenant "london" "Neighbourhood Watch Canada London"
+```
+
+3. Add our user. (**Please change ``xxx`` password to your own!**)
+
+```
+$ $GOBIN/nwapp-back add_user "bart@mikasoftware.com" "Bart" "Mika" "XXX" 1 "london" 1
+```
+
+4. And verify the URL works in the browser.
+
+    ```text
+    http://nwapp.ws/version
     ```

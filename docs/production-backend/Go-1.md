@@ -8,9 +8,9 @@
 
         $ curl -LO https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz
 
-3. Confirm our download is valid.
+3. Confirm our download is valid. Run this command and make sure the output equals ``66d83bfb5a9ede000e33c6579a91a29e6b101829ad41fffb5c5bb6c900e109d9``:
 
-        $ shasum -a 256 go1.12*.tar.gz
+        $ sha256sum go1.12*.tar.gz
 
 4. Install go.
 
@@ -77,4 +77,6 @@
 
 # Notes
 
-The following instructions where adapted from  [DigitalOcean](https://www.digitalocean.com/community/tutorials/how-to-install-go-1-7-on-centos-7).
+* The following instructions where adapted from  [DigitalOcean](https://www.digitalocean.com/community/tutorials/how-to-install-go-1-7-on-centos-7).
+
+* Also special thanks to [this article](https://linuxize.com/post/how-to-install-go-on-centos-7/).

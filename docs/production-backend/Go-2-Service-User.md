@@ -1,10 +1,12 @@
+This section explains how to create our ``nwatchcanada`` service user account which will be dedicated strictly to running our ``nwapp-back``.
+
 1. Create a services user for the application:
 
     ```
     $ sudo groupadd --system nwatchcanada;
     $ sudo useradd --system --gid nwatchcanada --shell /bin/bash --home /opt/nwatchcanada nwatchcanada;
 
-2. Create the Django project home inside ``/opt``:
+2. Create project home inside ``/opt``:
 
     ```
     $ sudo mkdir /opt/nwatchcanada
