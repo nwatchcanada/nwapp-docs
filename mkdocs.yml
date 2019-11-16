@@ -5,6 +5,7 @@ nav:
         - DigitalOcean Droplet: backend-install/1-DigitalOcean-Droplet.md
         - Virtual Hosts: backend-install/2-Virtual-Hosts.md
         - Application: backend-install/3-Application.md
+        - SSL: backend-install/4-Lets-Encrypt.md
     # # - Architecture: architecture.md
     # # - Hardware: parts.md
     # - Installation:
