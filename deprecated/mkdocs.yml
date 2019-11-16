@@ -1,0 +1,18 @@
+site_name: Neighbourhood Watch Canada
+nav:
+    - Home: index.md
+    # - Architecture: architecture.md
+    # - Hardware: parts.md
+    - Installation:
+        - Backend: installation/backend.md
+        - Frontend: installation/frontend.md
+    - Production (Backend):
+        - Overview: production-backend/1-Overview.md
+        - Linux: production-backend/2-DigitalOcean-Droplet.md
+        - Go:  production-backend/Go-1.md
+        - Service User:  production-backend/Go-2-Service-User.md
+        - Project:  production-backend/Go-3-Setup-Project.md
+    - Reference:
+        - Environment Variables: reference/Service-User.md
+        - API: reference/api.md
+theme: readthedocs

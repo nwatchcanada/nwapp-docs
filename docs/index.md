@@ -2,4 +2,4 @@
 
 # Welcome to NWApp
 
-This is documentation provided by [Neighbourhood Watch Canada](https://nwlondon.ca/) organization for installation, usage and development of the **NWApp** open-source project. The documentation will provide details on how to setup the following components. To get started, please see the [documentation](https://nwapp-docs.readthedocs.io/en/latest/).
+This is documentation provided by [Neighbourhood Watch Canada](https://nwlondon.ca/) organization for installation, usage and development of the **NWApp** open-source project. The documentation will provide details on how to setup the following components.
