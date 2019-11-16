@@ -1,6 +1,6 @@
-# HOWTO: Setup Swap Memory for NPApp
-https://www.vembu.com/blog/increase-swap-memory-centos-7/
-https://www.digitalocean.com/community/tutorials/how-to-add-swap-on-centos-7
+## Create Swap
+
+Start by running the following:
 
 ```
 swapon -s
@@ -22,8 +22,13 @@ df -h
 The fastest and easiest way to create a swap file is by using fallocate. This command creates a file of a preallocated size instantly. We can create a 4 gigabyte file by typing:
 
 ```
-sudo fallocate -l 5G /swapfile
 sudo dd if=/dev/zero of=/swapfile count=4096 bs=1MiB
+```
+
+Developers Note: If you want 8 gigabytes:
+
+```
+sudo dd if=/dev/zero of=/swapfile count=8192 bs=1MiB
 ```
 
 After entering your password to authorize sudo privileges, the swap file will be created almost instantly, and the prompt will be returned to you. We can verify that the correct amount of space was reserved for swap by using ls:
@@ -86,3 +91,11 @@ Append file.
 ```
 
 Congradulations your swap file has been intergrated with the OS.
+
+
+## Special Thanks
+Special thanks to the following articles:
+
+* [Increase Swap Memory CentOS 7](https://www.vembu.com/blog/increase-swap-memory-centos-7/)
+
+* [How to Add Swapp on CentOS 7](https://www.digitalocean.com/community/tutorials/how-to-add-swap-on-centos-7)

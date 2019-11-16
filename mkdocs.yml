@@ -6,18 +6,5 @@ nav:
         - Virtual Hosts: backend-install/2-Virtual-Hosts.md
         - Application: backend-install/3-Application.md
         - SSL: backend-install/4-Lets-Encrypt.md
-    # # - Architecture: architecture.md
-    # # - Hardware: parts.md
-    # - Installation:
-    #     - Backend: installation/backend.md
-    #     - Frontend: installation/frontend.md
-    # - Production (Backend):
-    #     - Overview: production-backend/1-Overview.md
-    #     - Linux: production-backend/2-DigitalOcean-Droplet.md
-    #     - Go:  production-backend/Go-1.md
-    #     - Service User:  production-backend/Go-2-Service-User.md
-    #     - Project:  production-backend/Go-3-Setup-Project.md
-    # - Reference:
-    #     - Environment Variables: reference/Service-User.md
-    #     - API: reference/api.md
+        - Swap Memory: backend-install/5-Swap-Memory.md
 theme: readthedocs
