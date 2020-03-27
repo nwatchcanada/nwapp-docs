@@ -41,7 +41,7 @@ $ cd ~/nwapp-back
 (2) Setup our virtual environment
 
 ```bash
-$ virtualenv -p python3.6 env
+$ virtualenv -p python3.7 env
 ```
 
 (3) Now lets activate virtual environment
@@ -50,14 +50,24 @@ $ virtualenv -p python3.6 env
 $ source env/bin/activate
 ```
 
-(4) We will need to build ``psycopg2`` library before proceeding to install our application. Special thanks to [this article](https://community.webfaction.com/questions/7714/installing-psycopg2-pg_config-missing/7721).
+(4) We will need to build ``psycopg2`` library before proceeding to install our application's `requirements.txt` file. Special thanks to [this article](https://community.webfaction.com/questions/7714/installing-psycopg2-pg_config-missing/7721).
 
 ```bash
-(env)$ export PATH=/usr/pgsql-10/bin:$PATH
+(env)$ export PATH=/usr/pgsql-12/bin/:$PATH
 (env)$ pip install psycopg2
 ```
 
-(5) Now lets install the libraries this project depends on.
+
+(5) We will need to build ``gdal`` library before proceeding to install our application.
+
+```bash
+(env)$ export PATH=/usr/gdal30/bin/:$PATH
+(env)$ pip install gdal
+```
+
+
+(6) Finally - Let us install the libraries this project depends on without dealing
+with `psycopg2` and `gdal` giving us problems:
 
 ```bash
 (env)$ pip install -r requirements.txt
@@ -88,6 +98,8 @@ ALTER ROLE django SUPERUSER;
 CREATE EXTENSION postgis;
 ```
 
+(4) If there are no errors then congradulations!
+
 
 ## Environment Variables Setup
 
@@ -106,6 +118,11 @@ CREATE EXTENSION postgis;
 
 (3) Edit the file to suite your needs.
 
+(DO NOT SKIP: Temporary BUGFIX for messagepack library)
+cd /opt/django/nwapp-back/env/lib/python3.7/site-packages/rest_framework_msgpack
+vi parsers.py
+
+Change `from django.utils.six import text_type` to ``.
 
 ## Setup the Application
 
@@ -114,6 +131,7 @@ CREATE EXTENSION postgis;
 ```
 cd ~/nwapp-back/nwapp; \
 redis-cli FLUSHDB; \
+source ../env/bin/activate; \
 python manage.py makemigrations; \
 python manage.py migrate_schemas --executor=multiprocessing; \
 python manage.py init_app; \
@@ -121,22 +139,6 @@ python manage.py setup_oauth2; \
 python manage.py create_shared_user "bart@mikasoftware.com" "123password" "Bart" "Mika"; \
 python manage.py collectstatic
 ```
-
-
-# DigtalOcean Nameserver
-
-1. Go and log into [DigitalOcean](https://digitalocean.com).
-
-2. Go to **Networking** section.
-
-3. Enter the domain and add it. Note: Please note that the URL used here is different.
-
-4. Add ``A record``  where the hostname points to our droplet.
-
-5. Add ``CNAME`` where the hostname is ``www`` and the alias is ``@``.
-
-6. Add ``CNAME`` where the hostname is ``*`` and the alias is ``@``.
-
 
 ### Confirm Redis Operational Status
 
@@ -166,46 +168,6 @@ PONG
 
 ### Setup Nginx with Project
 
-(1) (OPTIONAL) Open up our ``Nginx`` configuration file:
-
-```bash
-vi /etc/nginx/nginx.conf
-```
-
-(2) (OPTIONAL) Delete the following code.
-
-```
-server {
-    listen       80 default_server;
-    listen       [::]:80 default_server;
-    server_name  _;
-    root         /usr/share/nginx/html;
-
-    # Load configuration files for the default server block.
-    include /etc/nginx/default.d/*.conf;
-
-    location / {
-    }
-
-    error_page 404 /404.html;
-        location = /40x.html {
-    }
-
-    error_page 500 502 503 504 /50x.html;
-        location = /50x.html {
-    }
-}
-```
-
-(3) (OPTIONAL) Add the following code.
-
-```
-server {
-    listen 80 default_server;
-    deny all;
-}
-```
-
 (4) Create the first server block file.
 
 ```bash
@@ -226,8 +188,8 @@ server {
     client_max_body_size 0;  # Unlimited Upload File Size
 
     # Optional if you want logging in Nging.
-    access_log /var/log/nginx/default-access.log;
-    error_log /var/log/nginx/default-error.log;
+    access_log /var/log/nginx/nwapp-default-access.log;
+    error_log /var/log/nginx/nwapp-default-error.log;
 
     location = /favicon.ico { access_log off; log_not_found off; }
     location /static/ {
@@ -253,12 +215,6 @@ server {
         proxy_read_timeout 300s;
     }
 }
-```
-
-(6) Enable the new server block files.
-
-```bash
-sudo ln -s /etc/nginx/sites-available/nwapp.ws.conf /etc/nginx/sites-enabled/nwapp.ws.conf
 ```
 
 (7) (Optional) The following article should be read if you are setting up ``Django REST Framework`` with your project:
@@ -309,14 +265,14 @@ This section explains how to integrate our project with ``systemd`` so our opera
 (2) While you are logged in as a ``techops`` user, please write the following into the console.
 
 ```bash
-$ sudo vi /etc/systemd/system/gunicorn.service
+$ sudo vi /etc/systemd/system/nwapp_gunicorn.service
 ```
 
 (3) Implement
 
 ```
 [Unit]
-Description=gunicorn daemon
+Description=nwapp gunicorn daemon
 After=network.target
 
 [Service]
@@ -334,14 +290,14 @@ WantedBy=multi-user.target
 (4) We can now start the Gunicorn service we created and enable it so that it starts at boot:
 
 ```bash
-$ sudo systemctl start gunicorn
-$ sudo systemctl enable gunicorn
+$ sudo systemctl start nwapp_gunicorn
+$ sudo systemctl enable nwapp_gunicorn
 ```
 
 (5) Confirm our service is running.
 
 ```bash
-$ systemctl status gunicorn.service
+$ systemctl status nwapp_gunicorn.service
 ```
 
 6. And verify the URL works in the browser.
@@ -362,14 +318,14 @@ http://nwapp.ws/en/
 (1) While you are logged in as a ``techops`` user, please write the following into the console.
 
 ```bash
-$ sudo vi /etc/systemd/system/django_rq.service
+$ sudo vi /etc/systemd/system/nwapp_django_rq.service
 ```
 
 (2) Implement
 
 ```
 [Unit]
-Description=Redis rqworker for Django App
+Description=Redis rqworker for NWApp Django App
 After=network.target
 
 [Service]
@@ -388,14 +344,14 @@ WantedBy=multi-user.target
 (4) We can now start the Gunicorn service we created and enable it so that it starts at boot:
 
 ```bash
-$ sudo systemctl start django_rq
-$ sudo systemctl enable django_rq
+$ sudo systemctl start nwapp_django_rq
+$ sudo systemctl enable nwapp_django_rq
 ```
 
 (5) Confirm our service is running.
 
 ```bash
-$ systemctl status django_rq.service
+$ systemctl status nwapp_django_rq.service
 ```
 
 
@@ -404,14 +360,14 @@ $ systemctl status django_rq.service
 (1) While you are logged in as a ``techops`` user, please write the following into the console.
 
 ```bash
-$ sudo vi /etc/systemd/system/rq_scheduler.service
+$ sudo vi /etc/systemd/system/nwapp_rq_scheduler.service
 ```
 
 (2) Implement
 
 ```
 [Unit]
-Description=Redis rq_scheduler for Django App
+Description=Redis rq_scheduler for NWApp Django App
 After=network.target
 
 [Service]
@@ -430,53 +386,53 @@ WantedBy=multi-user.target
 (3) We can now start the Gunicorn service we created and enable it so that it starts at boot:
 
 ```bash
-$ sudo systemctl start rq_scheduler
-$ sudo systemctl enable rq_scheduler
+$ sudo systemctl start nwapp_rq_scheduler
+$ sudo systemctl enable nwapp_rq_scheduler
 ```
 
 (4) Confirm our service is running.
 
 ```bash
-$ sudo systemctl status rq_scheduler.service
+$ sudo systemctl status nwapp_rq_scheduler.service
 ```
 
 (5) If you did **OPTION 1** then you will need to run the following:
 
 ```bash
-sudo systemctl disable gunicorn; \
-sudo systemctl disable django_rq; \
-sudo systemctl disable rq_scheduler; \
-sudo systemctl stop gunicorn; \
-sudo systemctl stop django_rq; \
-sudo systemctl stop rq_scheduler;
+sudo systemctl disable nwapp_gunicorn; \
+sudo systemctl disable nwapp_django_rq; \
+sudo systemctl disable nwapp_rq_scheduler; \
+sudo systemctl stop nwapp_gunicorn; \
+sudo systemctl stop nwapp_django_rq; \
+sudo systemctl stop nwapp_rq_scheduler;
 ```
 
 (6) If you want to start up again, run:
 
 ```bash
-sudo systemctl enable gunicorn; \
-sudo systemctl enable django_rq; \
-sudo systemctl enable rq_scheduler; \
-sudo systemctl start gunicorn; \
-sudo systemctl start django_rq; \
-sudo systemctl start rq_scheduler;
+sudo systemctl enable nwapp_gunicorn; \
+sudo systemctl enable nwapp_django_rq; \
+sudo systemctl enable nwapp_rq_scheduler; \
+sudo systemctl start nwapp_gunicorn; \
+sudo systemctl start nwapp_django_rq; \
+sudo systemctl start nwapp_rq_scheduler;
 ```
 
 (7) If you want to start up again, run:
 
 ```bash
-sudo systemctl restart gunicorn; \
-sudo systemctl restart django_rq; \
-sudo systemctl restart rq_scheduler; \
+sudo systemctl restart nwapp_gunicorn; \
+sudo systemctl restart nwapp_django_rq; \
+sudo systemctl restart nwapp_rq_scheduler; \
 sudo systemctl restart nginx;
 ```
 
 (8) See the status
 
 ```
-sudo systemctl status gunicorn; \
-sudo systemctl status django_rq; \
-sudo systemctl status rq_scheduler;
+sudo systemctl status nwapp_gunicorn; \
+sudo systemctl status nwapp_django_rq; \
+sudo systemctl status nwapp_rq_scheduler;
 ```
 
 

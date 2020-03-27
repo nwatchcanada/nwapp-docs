@@ -33,17 +33,11 @@ sudo yum -y install firewalld;
 sudo yum -y install ntp;
 sudo yum -y install fail2ban;
 sudo yum -y install nginx;
-sudo yum -y install python36;
-sudo yum -y install python36-devel;
-sudo yum -y install python-pip;
-sudo rpm -Uvh https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-2.noarch.rpm
-sudo yum -y install postgresql10-server postgresql10
-sudo yum -y install postgis2_10;
-sudo yum -y install postgresql10-libs postgresql10-devel postgresql10-plpython
 sudo yum -y install redis;
 sudo yum -y install yum-cron
 sudo yum -y install GraphicsMagick-c++-devel;
 sudo yum -y install boost-devel;
+sudo yum -y install wget;
 ```
 
 (3) Update your ``root` password of your droplet. Be sure to set a secure password with the following requirements: (a) 8 characters (b) 1 uppercase character (c) one special character (d) no common words. Finally be sure to not forget this password!
@@ -94,7 +88,7 @@ $ chmod 600 .ssh/authorized_keys
 (7) On your local developers machine, attempt to log into the server with the ``techops`` user account to confirm it is working. If you cannot log in then please review steps 1 to 7 or search online for answers. Here is an example:
 
 ```bash
-local$ ssh -l techops 142.93.155.111
+local$ ssh -l techops 165.22.234.35
 ```
 
 (8). Exit from the ``techops`` user and disable ``root`` login for the ``sshd`` app.
@@ -176,14 +170,14 @@ $ sudo timedatectl set-timezone America/Toronto
 $ sudo timedatectl
 ```
 
-(4) Start ``ntp`` app, and enable it to start at boot-time.
+[DEPRECATED](4) Start ``ntp`` app, and enable it to start at boot-time.
 
 ```bash
 $ sudo systemctl start ntpd
 $ sudo systemctl enable ntpd
 ```
 
-### Auto-Update Cron
+### [DEPRECATED] Auto-Update Cron
 
 * https://www.techrepublic.com/article/how-to-enable-automatic-security-updates-on-centos-7-with-yum-cron/
 
@@ -313,93 +307,174 @@ http://nwapp.ws
 
 
 # Setup Python
+
+https://tecadmin.net/install-python-3-7-on-centos/
+
 1. Install our Python dependencies.
 
-        sudo yum -y install python36;
-        sudo yum -y install python36-devel;
-        sudo yum -y install python-pip;
+        # sudo yum -y install gcc openssl-devel bzip2-devel libffi-devel
 
-2. Confirm you installed the correct library.
+2. Download
 
-        python3.6 -V
+        # cd /usr/src
+        # sudo wget https://www.python.org/ftp/python/3.7.4/Python-3.7.4.tgz
 
-3. We will next install pip, which will manage software packages for Python:
+3. Extract
 
-        curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
-        sudo python3.6 get-pip.py
+        # sudo tar xzf Python-3.7.4.tgz
+
+
+4. Install
+
+        # cd Python-3.7.4
+        # sudo ./configure --enable-optimizations
+        # sudo make altinstall
+
+5. Confirm you installed the correct library.
+
+        # python3.7 -V
+
+6. Remove garbage.
+
+        # rm /usr/src/Python-3.7.4.tgz
+
+7. Set default python. Special thanks to [this link](https://unix.stackexchange.com/a/517050).
+
+        # alternatives --config python
+
+8. We will next install pip, which will manage software packages for Python:
+
+        sudo yum -y install python3-pip
+
+        sudo curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+        sudo python3 get-pip.py
         sudo rm get-pip.py
-        sudo pip install --upgrade pip
-        sudo ln -s /usr/local/bin/pip3.6 /bin/pip3.6
+        sudo ln -s /usr/local/bin/pip3.7 /bin/pip3.7
+        sudo pip3.7 install --upgrade pip
 
-4. Confirm we have the proper version.
+9. Confirm we have the proper version.
 
-        pip -V
+        pip3.7 -V
 
-5. Install some dependent libraries.
+10. Install some dependent libraries.
 
-        sudo pip-3.6 install virtualenv
+        sudo pip3.7 install virtualenv
         sudo ln -s /usr/local/bin/virtualenv /bin/virtualenv
 
 
 # Postgres
-(1) Initialize our database.
+The following instructions were taken from [this article](https://linuxconfig.org/how-to-install-postgres-on-redhat-8) and [this article](https://computingforgeeks.com/how-to-install-postgresql-12-on-centos-7/).
 
-```bash
-$ sudo /usr/pgsql-10/bin/postgresql-10-setup initdb
-```
+(0) Useful to know
 
-(2) Open the HBA configuration with your favorite text editor. We will use vi:
+        dnf list --available | grep postgis30
 
-```bash
-$ sudo vi /var/lib/pgsql/10/data/pg_hba.conf
-```
+(1) Install.
 
-(3) Find the lines that looks like this, near the bottom of the file:
+        sudo yum -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+        sudo dnf -qy module disable postgresql
+        sudo dnf -y install postgresql12 postgresql12-server  postgresql12-contrib postgresql12-devel
+
+(2) Initialize.
+
+        # sudo /usr/pgsql-12/bin/postgresql-12-setup initdb
+        # sudo systemctl enable --now postgresql-12
+        # sudo systemctl status postgresql-12
+
+(3) At this point the PostreSQL server should be up and running and listening on localhost port ``5432``. Use ``ss`` command to confirm that this is the case:
+
+        # sudo ss -nlt
+
+(5) Access PostreSQL database.
+
+       # sudo su - postgres
+       # psql
+
+(6) Change password and exit.
+
+        # \password postgres
+        # exit
+        # \q
+        # exit
+
+(7) Enable PostgreSQL server to listen on all available networks.
+
+        # sudo vi /var/lib/pgsql/12/data/postgresql.conf
+
+(8) Once ready add the following line somewhere to the CONNECTIONS AND AUTHENTICATION section:
+
+        listen_addresses = '*'
+
+(9) Enable MD5-encrypted password authentication. Open the HBA configuration with your favorite text editor. We will use vi:
+
+        $ sudo vi /var/lib/pgsql/12/data/pg_hba.conf
+
+
+(10) Find the lines that looks like this, near the bottom of the file:
 
 ```
 host    all             all             127.0.0.1/32            ident
 host    all             all             ::1/128                 ident
 ```
 
-(4) Then replace "ident" with "md5", so they look like this:
+(11) Then replace "ident" with "md5", so they look like this:
 
 ```
 host    all             all             127.0.0.1/32            md5
 host    all             all             ::1/128                 md5
 ```
 
-(5) Open the configuration with your favorite text editor. We will use vi:
+(12) Start the service
 
-```
-$ sudo vi /var/lib/pgsql/10/data/postgresql.conf
-```
+        $ sudo systemctl start postgresql-12
 
-(6) Then modify the following to look like this:
+(13) Make sure it boots all the time.
 
-```
-listen_addresses = '*'
-```
+        $ sudo systemctl enable postgresql-12
 
-(7) Start the service
+(14) Confirm working
 
-```
-$ sudo systemctl start postgresql-10
-```
+        $ sudo systemctl status postgresql-12
 
-(8) Make sure it boots all the time.
+(15) Begin using it...
 
-```
-$ sudo systemctl enable postgresql-10
-```
+        $ sudo -i -u postgres
+        $ psql
 
-(9) Begin using it...
+(16) Would you like to know more about PostGres setup? [Learn more.](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-centos-7)
 
-```
+# Postgis + Backend Application Database
+
+https://computingforgeeks.com/how-to-install-postgis-on-centos-8-linux/
+
+1. Install
+
+        sudo yum -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+        sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+        sudo dnf config-manager --set-enabled PowerTools
+        sudo dnf -qy module disable postgresql
+        sudo yum install postgis30_12
+        sudo dnf install gdal30 gdal30-devel
+
+2. Go to your ``postgres`` account.
+
+```bash
 $ sudo -i -u postgres
 $ psql
 ```
 
-(10) Would you like to know more about PostGres setup? [Learn more.](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-centos-7)
+3. Enter the following:
+
+```sql
+drop database nwapp_db;
+create database nwapp_db;
+\c nwapp_db;
+CREATE USER django WITH PASSWORD '123password';
+GRANT ALL PRIVILEGES ON DATABASE nwapp_db to django;
+ALTER USER django CREATEDB;
+ALTER ROLE django SUPERUSER;
+CREATE EXTENSION postgis;
+```
 
 # Setup Redis
 https://www.linode.com/docs/databases/redis/deploy-redis-on-centos-7
@@ -420,7 +495,8 @@ $ sudo vi /etc/redis.conf
 1. Install ``Node``.
 
     ```
-    curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -
+    cd /usr/src
+    sudo curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -
     sudo yum -y install nodejs
     ```
 
