@@ -1,36 +1,36 @@
 #### Nginx
-The following instructions are used to manually setup `letsencrypt` and automatically integrate with `nginx`. Special thanks to [this article](https://blogs.msdn.microsoft.com/mihansen/2018/03/15/creating-wildcard-ssl-certificates-with-lets-encrypt/).
 
-(1) Install our **Lets Encrypt** client.
+The following instructions will enable wildcard SSL certificates for CentOS 8
+using the DigitalOcean Plugin.
+
+Special thanks:
+https://certbot.eff.org/lets-encrypt/centosrhel8-nginx
+https://certbot.eff.org/docs/using.html
+https://certbot-dns-digitalocean.readthedocs.io/en/stable/
+https://stackoverflow.com/a/53830571
+
+
+1. Download and configure
 
 ```bash
-$ sudo yum install -y certbot-nginx
+$ cd /usr/src
+$ wget https://dl.eff.org/certbot-auto
+$ chmod a+x certbot-auto
+$ sudo ./certbot-auto --debug --install-only
+
+$ cd /opt/eff.org/certbot/venv
+$ source bin/activate
+$ sudo pip install certbot-dns-digitalocean
+$ deactivate
 ```
 
-(2) Generate our certificate.
 
-```bash
-certbot --nginx --agree-tos --server https://acme-v02.api.letsencrypt.org/directory --preferred-challenges dns -d "*.nwapp.ws" -d nwapp.ws
+DEPRECATED BELOW - SKIP
 ```
-
-3. Follow the instructions and choose the most appropriate options.
-
-4. Restart ``nginx``.
-
-  ```
-  systemctl restart nginx
-  ```
-
-5. Using your favourite browser, load up (https://nwapp.ws/en/)[https://nwapp.ws/en/] and it should work. If it does then congradulations!
-
-#### DigitalOcean
-The problem with the above instructions is that **you are responsible for manually renewing within 90 days**. This manual renewing is tedious, can we automate? Turns out we can. The above instructions setup ``letsencrypt`` with our ``nginx`` so we have it working. In this section we will integrate our code with ``DigitalOcean`` and make auto-renewing taken care of by a script.
-
-1. Install our ``DigitalOcean`` plugin.
-
-  ```
-  sudo yum install -y certbot-dns-digitalocean
-  ```
+$ sudo mv certbot-auto /usr/local/bin/certbot-auto
+$ sudo chown root /usr/local/bin/certbot-auto
+$ sudo chmod 0755 /usr/local/bin/certbot-auto
+```
 
 2. Log into (DigitalOcean)[https://digitalocean.com] and create an ``API key``.
 https://certbot-dns-digitalocean.readthedocs.io/en/latest/#
@@ -38,8 +38,8 @@ https://certbot-dns-digitalocean.readthedocs.io/en/latest/#
 3. Create our credentials file:
 
   ```
-  mkdir /etc/letsencrypt/digitalocean
-  cat > /etc/letsencrypt/digitalocean/credentials.ini
+  $ sudo mkdir -p /etc/letsencrypt/digitalocean
+  $ sudo cat > /etc/letsencrypt/digitalocean/credentials.ini
   ```
 
 4. Populate the file with your key. Here is example:
@@ -49,28 +49,31 @@ https://certbot-dns-digitalocean.readthedocs.io/en/latest/#
   dns_digitalocean_token = 0000111122223333444455556666777788889999aaaabbbbccccddddeeeeffff
   ```
 
-5. Finally run the code which will automatically generate our certificate.
+5. Better permissions
 
   ```
-  certbot certonly --dns-digitalocean --dns-digitalocean-credentials /etc/letsencrypt/digitalocean/credentials.ini --dns-digitalocean-propagation-seconds 60 -d "*.nwapp.ws" -d nwapp.ws
+  sudo chmod 700 /etc/letsencrypt/digitalocean/credentials.ini
   ```
 
-6. (Optional) https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-centos-7
 
-  ```bash
-  sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
-  ```
+6. Open up our virtual host file.
 
-7. Restart the server.
+```
+sudo vi /etc/nginx/sites-available/nwapp.ws.conf
+```
 
-    ```
-    sudo systemctl restart nginx
-    ```
 
-8. Would you like to know more?
+Make sure you have the domain information specified. Once you are ready, continue...
 
-* https://certbot.eff.org/lets-encrypt/centosrhel7-nginx
-* https://certbot-dns-digitalocean.readthedocs.io/en/latest/
+(3) Install
+
+    $ cd /usr/bin/
+    $ certbot certonly \
+    --dns-digitalocean \
+    --dns-digitalocean-credentials /etc/letsencrypt/digitalocean/credentials.ini \
+    --dns-digitalocean-propagation-seconds 60 \
+    --nginx \
+    -d "*.nwapp.ws" -d nwapp.ws
 
 
 ## HOW DO WE AUTO RENEW?
@@ -119,7 +122,7 @@ server {
 server {
     listen 80;
 
-    server_name *.nwapp.ws;
+    server_name nwapp.ws *.nwapp.ws;
 
     charset     utf-8;
     access_log off;
@@ -163,24 +166,6 @@ server {
 ```
 
 
-(3) Open up the main ``nginx`` config file.
-
-```
-vi /etc/nginx/nginx.conf
-```
-
-(4) Copy and paste the following code which will redirect all http traffic to our SSL site.
-
-```
-server {
-    listen 80 default_server;
-
-    server_name _;
-
-    return 301 https://$host$request_uri;
-}
-```
-
 (5) Confirm and restart the server.
 
 ```bash
@@ -191,7 +176,8 @@ $ sudo systemctl restart nginx
 (6) Confirm
 
 ```bash
-curl -I http://theworkery.ws
+curl -I http://nwapp.ws
+curl -I http://london.nwapp.ws
 ```
 
 (7) (OPTIONAL) Useful tutorial: https://www.digitalocean.com/community/tutorials/how-to-redirect-www-to-non-www-with-nginx-on-centos-7
