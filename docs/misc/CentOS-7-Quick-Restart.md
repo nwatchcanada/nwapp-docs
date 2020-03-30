@@ -7,11 +7,18 @@ The goal of this article is to provide instructions on how to quickly format the
 Please run the following:
 
   ```bash
-  sudo systemctl stop gunicorn; \
-  sudo systemctl stop django_rq; \
-  sudo systemctl stop rq_scheduler;
+  sudo systemctl stop nwapp_gunicorn; \
+  sudo systemctl stop nwapp_django_rq; \
+  sudo systemctl stop nwapp_rq_scheduler;
   ```
 
+Confirm status:
+
+  ```bash
+  sudo systemctl status nwapp_gunicorn; \
+  sudo systemctl status nwapp_django_rq; \
+  sudo systemctl status nwapp_rq_scheduler;
+  ```
 
 ### Database
 While being logged in as ``root`` or ``techops`` please write the following in your console.
@@ -44,13 +51,14 @@ While being logged in as ``root`` or ``techops`` please write the following in y
   su - django
   cd nwapp-back
   source env/bin/activate
+  git pull origin master
   cd nwapp
   ```
 
 Just copy and paste this into your command console.
 
 ```bash
-redis-cli FLUSHDB;
+redis-cli FLUSHDB; \
 python manage.py makemigrations; \
 python manage.py migrate_schemas --executor=multiprocessing; \
 python manage.py init_app; \
@@ -81,31 +89,42 @@ python manage.py create_shared_organization london \
        "" \
        "N6J4X4" \
        "America/Toronto" \
-       "https://www.coplogic.ca/dors/en/filing/selectincidenttype?dynparam=1584326750929";
+       "https://www.coplogic.ca/dors/en/filing/selectincidenttype?dynparam=1584326750929" \
+       "42.983611" \
+       "-81.249722" \
+       "13";
 python manage.py create_random_district "london" 50;
-python manage.py create_random_watch "london" 1000;
+python manage.py create_random_watch "london" 500;
 python manage.py create_random_member "london" 1000;
-python manage.py create_random_area_coordinator "london" 250;
+python manage.py create_random_area_coordinator "london" 100;
 python manage.py create_random_associate "london" 100;
-python manage.py create_random_task_item "london" 500;
+python manage.py create_random_task_item "london" 250;
 ```
 
 ### Resume Services
 Please run the following:
 
   ```bash
-  sudo systemctl start gunicorn; \
-  sudo systemctl start django_rq; \
-  sudo systemctl start rq_scheduler;
+  sudo systemctl start nwapp_gunicorn; \
+  sudo systemctl start nwapp_django_rq; \
+  sudo systemctl start nwapp_rq_scheduler;
+  ```
+
+Confirm status:
+
+  ```bash
+  sudo systemctl status nwapp_gunicorn; \
+  sudo systemctl status nwapp_django_rq; \
+  sudo systemctl status nwapp_rq_scheduler;
   ```
 
 ## Frontend Instructions
 While being logged in as ``root`` or ``techops`` please write the following in your console.
 
-```bash
-cd /var/www/nwapp.ca; \
-git pull origin master; \
-npm install; \
-sudo npm run build; \
-sudo systemctl restart nginx;
-```
+  ```bash
+  cd /var/www/nwapp.ca; \
+  git pull origin master; \
+  npm install; \
+  sudo npm run build; \
+  sudo systemctl restart nginx;
+  ```
