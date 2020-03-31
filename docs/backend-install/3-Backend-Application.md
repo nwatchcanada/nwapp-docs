@@ -27,6 +27,37 @@ $ sudo chown django:django /opt/django
 $ sudo su - django
 ```
 
+# OPTIONAL: Support SSH Key
+
+(1) (Optional) **On your local developers machine**, generate the ``ssh`` key pair values. When prompted about passphase, skip it. After generating the key, print the public keys to the console.
+
+```bash
+local$ ssh-keygen
+local$ cat ~/.ssh/id_rsa.pub
+```
+
+(2) Now on your server, copy and paste your ssh key pair into the new user.
+
+```bash
+# su - django
+$ mkdir .ssh
+$ chmod 700 .ssh
+$ vi .ssh/authorized_keys
+```
+
+(3) Restrict the permissions of the *authorized_keys* file with this command. Do not skip this command as you will be unable to ``ssh`` into this server without setting the permissions here:
+
+```bash
+$ chmod 600 .ssh/authorized_keys
+```
+
+(4) On your local developers machine, attempt to log into the server with the ``techops`` user account to confirm it is working. If you cannot log in then please review steps 1 to 7 or search online for answers. Here is an example:
+
+```bash
+local$ ssh -l django 165.22.234.35
+```
+
+
 # Setup the project
 ## Setup from GitHub
 
@@ -73,6 +104,20 @@ with `psycopg2` and `gdal` giving us problems:
 (env)$ pip install -r requirements.txt
 ```
 
+## GeoIP2 Setup
+
+1. You *must* download the GZIP binary files ``GeoLite2 City`` and ``GeoLite2 Country`` from [this link](https://dev.maxmind.com/geoip/geoip2/geolite2/) on your local computer. Please unzip those files in the ``./nwapp/geoip`` folder so you should have the following structure locally:
+
+* ``nwapp-back/nwapp/geoip/GeoLite2-City.mmdb``
+* ``nwapp-back/nwapp/geoip/GeoLite2-Country.mmdb``
+
+2. Now we need to upload our files to our remote server.
+
+```
+cd /Users/bmika/python/github.com/nwatchcanada/nwapp-back/nwapp/geoip;
+scp GeoLite2-City.mmdb django@165.22.234.35:/opt/django/nwapp-back/nwapp/geoip;
+scp GeoLite2-Country.mmdb django@165.22.234.35:/opt/django/nwapp-back/nwapp/geoip;
+```
 
 ## Database Setup
 

@@ -118,6 +118,23 @@ Confirm status:
   sudo systemctl status nwapp_rq_scheduler;
   ```
 
+### Restart Services
+Please run the following:
+
+  ```bash
+  sudo systemctl restart nwapp_gunicorn; \
+  sudo systemctl restart nwapp_django_rq; \
+  sudo systemctl restart nwapp_rq_scheduler;
+  ```
+
+Confirm status:
+
+  ```bash
+  sudo systemctl status nwapp_gunicorn; \
+  sudo systemctl status nwapp_django_rq; \
+  sudo systemctl status nwapp_rq_scheduler;
+  ```
+
 ## Frontend Instructions
 While being logged in as ``root`` or ``techops`` please write the following in your console.
 
