@@ -453,7 +453,7 @@ https://computingforgeeks.com/how-to-install-postgis-on-centos-8-linux/
         sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
         sudo dnf config-manager --set-enabled PowerTools
         sudo dnf -qy module disable postgresql
-        sudo yum install postgis30_12
+        sudo yum -y install postgis30_12
         sudo dnf install gdal30 gdal30-devel
 
 2. Go to your ``postgres`` account.

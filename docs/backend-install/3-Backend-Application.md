@@ -255,8 +255,10 @@ server {
         add_header               P3P 'CP="ALL DSP COR PSAa PSDa OUR NOR ONL UNI COM NAV"';
 
         # Extend our timeout to handle longer processes.
-        proxy_connect_timeout 75s;
-        proxy_read_timeout 300s;
+        proxy_connect_timeout       900;
+        proxy_send_timeout          900;
+        proxy_read_timeout          900;
+        send_timeout                900;
     }
 }
 ```

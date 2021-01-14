@@ -48,7 +48,7 @@ Once the code above was written, please exit and and be logged in as either ``ro
 While being logged in as ``root`` or ``techops`` please write the following in your console.
 
   ```
-  su - django
+  sudo su - django
   cd nwapp-back
   source env/bin/activate
   git pull origin master
@@ -63,12 +63,6 @@ python manage.py makemigrations; \
 python manage.py migrate_schemas --executor=multiprocessing; \
 python manage.py init_app; \
 python manage.py setup_oauth2;
-```
-
-Optional, but **please change the password** when you are using in **production** environment:
-
-```bash
-python manage.py create_shared_user "bart@mikasoftware.com" "123password" "Bart" "Mika";
 ```
 
 If you would like to seed the database with random data then please run the following:
@@ -93,6 +87,22 @@ python manage.py create_shared_organization london \
        "42.983611" \
        "-81.249722" \
        "13";
+
+python manage.py run_historic_csv_import_for_districts "london" "prod";
+python manage.py run_historic_csv_import_for_watches "london" "prod";
+python manage.py run_historic_csv_import_for_members "london" "prod";
+```
+
+Optional, but **please change the password** when you are using in **production** environment:
+
+```bash
+python manage.py create_shared_user "bart@mikasoftware.com" "123password" "Bart" "Mika";
+```
+
+
+Randomizer
+
+```
 python manage.py create_random_district "london" 50;
 python manage.py create_random_watch "london" 500;
 python manage.py create_random_member "london" 1000;
@@ -140,8 +150,8 @@ While being logged in as ``root`` or ``techops`` please write the following in y
 
   ```bash
   cd /var/www/nwapp.ca; \
-  git pull origin master; \
-  npm install; \
+  sudo git pull origin master; \
+  sudo npm install; \
   sudo npm run build; \
   sudo systemctl restart nginx;
   ```

@@ -81,3 +81,15 @@ server {
     ```
 
 5. (OPTIONAL) Useful tutorial: https://www.digitalocean.com/community/tutorials/how-to-redirect-www-to-non-www-with-nginx-on-centos-7
+
+## Auto-Renew
+
+```
+sudo crontab -e
+```
+
+add
+
+```
+0 0,12 * * * /opt/eff.org/certbot/venv/bin/certbot renew && systemctl restart nginx
+```
